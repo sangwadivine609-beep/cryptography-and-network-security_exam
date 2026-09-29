@@ -1,0 +1,66 @@
+FIREWALL CONFIGURATION
+Student Records Server
+
+Records Server IP: 192.168.1.70
+Service: Student Records Application
+Protocol: TCP
+Service Port: 8443
+
+Local/Staff Network:
+192.168.1.0/24
+
+Simulated Guest Network:
+192.168.2.0/24
+
+Default Policy:
+DROP
+
+
+FIREWALL RULES
+
+Rule 1:
+Allow established and related connections.
+
+Rule 2:
+DROP all traffic from the simulated guest network
+192.168.2.0/24 to the records server
+192.168.1.70.
+
+Rule 3:
+ACCEPT TCP traffic from the staff network
+192.168.1.0/24 to the records server
+192.168.1.70 on port 8443.
+
+Rule 4:
+DROP TCP traffic to port 8443 from sources
+outside the authorised staff network.
+
+Rule 5:
+DROP all other inbound traffic by default.
+
+
+FIREWALL TESTS
+
+Test 1:
+Source: 192.168.1.50
+Destination: 192.168.1.70
+Port: TCP 8443
+Expected: ACCEPT
+Actual: ACCEPT
+Status: PASS
+
+Test 2:
+Source: 192.168.2.75
+Destination: 192.168.1.70
+Port: TCP 8443
+Expected: DROP
+Actual: DROP
+Status: PASS
+
+Test 3:
+Source: 203.0.113.50
+Destination: 192.168.1.70
+Port: TCP 8443
+Expected: DROP
+Actual: DROP
+Status: PASS
