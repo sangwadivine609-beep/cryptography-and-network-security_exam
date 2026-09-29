@@ -1,0 +1,244 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{float}
+
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=black}
+
+\title{\textbf{Cryptography and Network Security}\\
+\large Technical Report\\
+\vspace{0.3cm}
+ETTCS801}
+\author{MULUMBA BAKILONGO NICOLAS}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textbf{ULK POLYTECHNIC INSTITUTE}\\
+Cryptography and Network Security\\
+Lecturer: Isaac TUMWINE\\
+Assessment: Integrated Situation
+\end{center}
+
+\section*{GitHub Repository}
+\url{https://github.com/nicolasmulumba000-create/cryptography-network-security-exam.git}
+
+\section{Introduction}
+This report presents the work completed for the ETTCS801 Cryptography and Network Security integrated situation. The project addresses the protection of student records through risk assessment, file encryption and decryption, SHA-256 integrity checking, error handling, and network traffic filtering.
+
+A fictional sample student record was used for the cryptography tests. The firewall component was reproduced as a Python simulation on a Windows 11 development computer because a separate Linux firewall/laboratory network was not available for the simulation. The Linux \texttt{iptables} rule logic is documented separately and the Python simulator reproduces the required rule order and test outcomes.
+
+\section{Risk Assessment}
+
+\subsection{Assets}
+Three important assets were identified:
+\begin{enumerate}
+    \item \textbf{Student Records:} Academic and personal information stored on the central server.
+    \item \textbf{Student Records Server:} The central server that stores and provides access to student records.
+    \item \textbf{Network Services:} Services that allow authorised staff and campuses to access the student records system.
+\end{enumerate}
+
+\subsection{Vulnerabilities and Consequences}
+\begin{longtable}{p{0.40\textwidth}p{0.48\textwidth}}
+\toprule
+\textbf{Vulnerability} & \textbf{Possible Consequence}\\
+\midrule
+Weak staff passwords & Unauthorised users may gain access to accounts and student records.\\
+Unencrypted file transfers & Student information may be intercepted during transmission.\\
+Guest network access to the records server & Unauthorised users may access or attack the records server.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Risk Ranking}
+\begin{longtable}{p{0.25\textwidth}p{0.16\textwidth}p{0.16\textwidth}p{0.33\textwidth}}
+\toprule
+\textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Reason}\\
+\midrule
+Weak staff passwords & High & High & Weak credentials can be easier to compromise and may provide access to sensitive records.\\
+Unencrypted file transfers & Medium & High & Data transmitted without encryption may be exposed during transfer.\\
+Guest access to records server & Medium & High & Unauthorised network users could attempt to access the records server.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Recommended Controls}
+\begin{itemize}
+    \item \textbf{Weak staff passwords:} Implement strong password requirements and secure authentication practices.
+    \item \textbf{Unencrypted file transfers:} Use encrypted communication for transferring student records.
+    \item \textbf{Guest network access:} Use firewall rules and network segmentation to block guest access to the student records server.
+\end{itemize}
+
+\section{Encryption and Integrity Application}
+
+\subsection{Sample Student Record}
+A fictional sample student record was used for testing so that no real student information was exposed. The record contains a sample student ID, name, programme, and year.
+
+\textbf{Evidence 1:} Screenshot of \texttt{student\_record.txt} should be included in the final evidence set.
+
+\subsection{Encryption}
+A Python security toolkit was developed using the Python \texttt{cryptography} library and Fernet symmetric encryption. A cryptographically generated key is used for encryption and decryption. The encryption key is kept outside the GitHub repository.
+
+The encryption process reads the sample student record, encrypts its contents, and writes the encrypted output to \texttt{student\_record.enc}.
+
+Example execution command:
+\begin{verbatim}
+python security_tool.py encrypt
+\end{verbatim}
+
+\textbf{Evidence 2:} Terminal screenshot showing the encryption command and successful result.
+
+\subsection{Decryption and Verification}
+The encrypted file is decrypted using the same protected key. The decrypted content is written to \texttt{student\_record\_decrypted.txt}. The program compares the decrypted content with the original student record to verify that the contents match.
+
+Example execution command:
+\begin{verbatim}
+python security_tool.py decrypt
+\end{verbatim}
+
+\textbf{Evidence 3:} Terminal screenshot showing successful decryption and verification.
+
+\subsection{SHA-256 Integrity Checking}
+SHA-256 hashing is used to produce a digest of the student record. Recalculating the digest after a controlled modification should produce a different value, demonstrating that a change can be detected.
+
+Example command:
+\begin{verbatim}
+python security_tool.py hash
+\end{verbatim}
+
+\textbf{Evidence 4:} Original SHA-256 hash screenshot.\\
+\textbf{Evidence 5:} Hash after controlled modification screenshot, followed by restoration of the original sample data.
+
+\subsection{Error Handling}
+The toolkit is intended to handle missing files and invalid commands without crashing. These tests should be performed and recorded before final submission.
+
+\textbf{Evidence 6:} Missing-file and invalid-command test screenshots.
+
+\section{Network Traffic Filtering}
+
+The assignment requires firewall rules that block guest access to the student records server, permit authorised staff access to the specified service, block other inbound access to that service, and test one permitted and two blocked connections.
+
+Because the development computer is running Windows 11 and no separate Linux firewall/laboratory network was available for this simulation, the required rule logic was reproduced in Python. The guest network is therefore a simulated network for the purpose of the test. The Linux \texttt{iptables} equivalent is documented in \texttt{firewall\_rules.sh}.
+
+\subsection{Firewall Configuration}
+The network information of the Windows 11 computer was obtained with the \texttt{ipconfig} command. The relevant values are:
+\begin{itemize}
+    \item Records server / test host: \texttt{192.168.1.70}
+    \item Local/staff network: \texttt{192.168.1.0/24}
+    \item Default gateway: \texttt{192.168.1.254}
+    \item Simulated guest network: \texttt{192.168.2.0/24}
+    \item Service: Student Records Application
+    \item Protocol: TCP
+    \item Service port: \texttt{8443}
+\end{itemize}
+
+The rule logic is:
+\begin{enumerate}
+    \item Allow established and related connections.
+    \item Drop traffic from the simulated guest network to the records server.
+    \item Accept TCP traffic from the staff network to port 8443.
+    \item Drop TCP traffic to port 8443 from sources outside the authorised staff network.
+    \item Drop other inbound traffic by default.
+\end{enumerate}
+
+\textbf{Evidence 7:} The terminal screenshot below shows the Python firewall simulation and its three test results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../firewall_simulation_evidence.png}
+    \caption{Windows 11 Python firewall simulation showing all three tests passing.}
+    \label{fig:firewall}
+\end{figure}
+
+\subsection{Firewall Test 1: Permitted Connection}
+\begin{itemize}
+    \item Source: \texttt{192.168.1.50}
+    \item Destination: \texttt{192.168.1.70}
+    \item Service/Port: TCP \texttt{8443}
+    \item Expected result: ACCEPT
+    \item Actual result: ACCEPT
+    \item Status: PASS
+\end{itemize}
+
+The source address is within the local/staff network and the destination port is the authorised service port.
+
+\textbf{Evidence 8:} Figure~\ref{fig:firewall} shows Test 1 with an ACCEPT result.
+
+\subsection{Firewall Test 2: Blocked Guest Connection}
+\begin{itemize}
+    \item Source: \texttt{192.168.2.75}
+    \item Destination: \texttt{192.168.1.70}
+    \item Service/Port: TCP \texttt{8443}
+    \item Expected result: DROP
+    \item Actual result: DROP
+    \item Status: PASS
+\end{itemize}
+
+The source address belongs to the simulated guest network, so the connection is blocked.
+
+\textbf{Evidence 9:} Figure~\ref{fig:firewall} shows Test 2 with a DROP result.
+
+\subsection{Firewall Test 3: Blocked Other Inbound Connection}
+\begin{itemize}
+    \item Source: \texttt{203.0.113.50}
+    \item Destination: \texttt{192.168.1.70}
+    \item Service/Port: TCP \texttt{8443}
+    \item Expected result: DROP
+    \item Actual result: DROP
+    \item Status: PASS
+\end{itemize}
+
+The source is outside the authorised staff network and is therefore blocked from the service port.
+
+\textbf{Evidence 10:} Figure~\ref{fig:firewall} shows Test 3 with a DROP result.
+
+\subsection{Firewall Reproduction Command}
+The simulation can be reproduced on Windows 11 with:
+\begin{verbatim}
+python firewall_simulator.py
+\end{verbatim}
+
+The detailed test values and outcomes are recorded in \texttt{filter\_tests.md}.
+
+\section{Project Evidence and GitHub Submission}
+The repository contains the Python source code, sample record, encrypted and decrypted files, risk assessment, firewall configuration, firewall simulator, test evidence documentation, README, and the technical report.
+
+The GitHub repository is:
+
+\url{https://github.com/nicolasmulumba000-create/cryptography-network-security-exam.git}
+
+\textbf{Evidence 11:} GitHub repository screenshot should be included in the final evidence set.\\
+\textbf{Evidence 12:} README screenshot should be included in the final evidence set.
+
+\section{Conclusion}
+The project applies cryptographic, integrity, risk-management, and network-filtering controls to the student-record security scenario. The Python toolkit provides encryption and decryption using a protected key and supports SHA-256 integrity checking. The firewall component was reproduced as a Python simulation on Windows 11 using the computer's IPv4 address, with a simulated guest network and an external test source. One permitted and two blocked firewall tests were executed and all three simulation tests passed.
+
+The firewall results should be described as simulation results rather than as a live Windows or Linux firewall deployment. If the assessor later provides an authorised laboratory network and a specific service/port, those laboratory values and live test results should replace the simulated values in the final report.
+
+\section*{Repository URL}
+\url{https://github.com/nicolasmulumba000-create/cryptography-network-security-exam.git}
+
+\section*{Final Evidence Checklist}
+\begin{itemize}[label={} ]
+    \item Sample student record screenshot
+    \item Encryption command/result screenshot
+    \item Decryption and verification screenshot
+    \item Original SHA-256 hash screenshot
+    \item Modified-file SHA-256 hash screenshot
+    \item Missing-file error screenshot
+    \item Invalid-command error screenshot
+    \item Firewall simulation screenshot (included in this report)
+    \item Permitted connection evidence (Test 1)
+    \item Blocked guest connection evidence (Test 2)
+    \item Blocked external connection evidence (Test 3)
+    \item GitHub repository screenshot
+    \item README screenshot
+\end{itemize}
+
+\end{document}
